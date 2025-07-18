@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.tox/
+.venv/
+venv/
+env/
+
+# Database config (crucial for security)
+config/db_config.ini
+
+details.md
+docker-compose.yml
