@@ -1,5 +1,5 @@
 import os
-import datetime
+import configparser
 
 def get_file_metadata(filepath):
     """
@@ -11,10 +11,8 @@ def get_file_metadata(filepath):
         filename = os.path.basename(filepath)
         extension = os.path.splitext(filename)[1].lower()
         if extension.startswith('.'):
-            extension = extension[1:] # Remove leading dot
+            extension = extension[1:]
 
-        # Timestamps are often floats (seconds since epoch) in os.stat
-        # Convert to milliseconds for BIGINT storage in MySQL
         creation_time_ms = int(stat_info.st_ctime * 1000)
         modification_time_ms = int(stat_info.st_mtime * 1000)
 
@@ -25,21 +23,20 @@ def get_file_metadata(filepath):
             'size': stat_info.st_size,
             'creation_time': creation_time_ms,
             'modification_time': modification_time_ms,
-            'tags': '' # Default empty tags
+            'tags': ''
         }
     except FileNotFoundError:
-        # print(f"Warning: File not found during metadata collection: {filepath}")
+        print(f"Warning: File not found during metadata collection: {filepath}")
         return None
     except OSError as e:
-        # print(f"Warning: OS Error accessing {filepath}: {e}")
+        print(f"Warning: OS Error accessing {filepath}: {e}")
         return None
     except Exception as e:
-        # print(f"Warning: Unexpected error with {filepath}: {e}")
+        print(f"Warning: Unexpected error with {filepath}: {e}")
         return None
 
 def parse_db_config(config_file='config/db_config.ini'):
     """Parses database configuration from an INI file."""
-    import configparser
     config = configparser.ConfigParser()
     try:
         config.read(config_file)
@@ -58,8 +55,7 @@ def parse_db_config(config_file='config/db_config.ini'):
 
 def format_navigable_path(filepath):
     """
-    Splits a full file path into its components for easier navigation,
-    similar to what we discussed previously.
+    Splits a full file path into its components for easier navigation.
     """
     parts = []
     current_path = filepath

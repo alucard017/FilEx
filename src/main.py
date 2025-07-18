@@ -7,8 +7,6 @@ from .database_manager import DatabaseManager
 from .file_scanner import FileScanner
 from .search_manager import SearchManager
 
-# Ensure the parent directory is in the sys.path for module imports
-# This is crucial when running from the project root using 'python -m src.main'
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 if project_root not in sys.path:
@@ -71,21 +69,9 @@ def run_indexer():
     start_time = time.perf_counter()
     file_scanner = FileScanner(db_manager)
     
-    # --- CRITICAL CHANGE FOR TQDM ---
-    # Start the DB writer BEFORE scanning to immediately capture data
-    db_manager.start_writer_thread(total_expected_files=0) # Start as indeterminate bar
+    db_manager.start_writer_thread(total_expected_files=0)
 
-    # Start scanning. The file_scanner will populate the queue.
-    file_scanner.start_scanning(root_dirs) # This populates total_files_scanned
-
-    # Now that scanning is complete and total_files_scanned is known,
-    # update the tqdm total for the database writer.
-    # This must happen BEFORE db_manager.wait_for_writer_thread()
-    # to give the writer a chance to use the total.
-    if db_manager.tqdm_instance:
-        db_manager.tqdm_instance.total = file_scanner.total_files_scanned
-        db_manager.tqdm_instance.refresh() # Ensure the total is immediately displayed
-    # --- END CRITICAL CHANGE ---
+    file_scanner.start_scanning(root_dirs)
 
     print("\nAll scanning tasks initiated. Waiting for database writes to complete...")
     db_manager.wait_for_writer_thread()

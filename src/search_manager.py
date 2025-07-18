@@ -13,7 +13,6 @@ class SearchManager:
         try:
             self.connection = mysql.connector.connect(**self.db_config)
             if self.connection.is_connected():
-                # print("SearchManager connected to MySQL.")
                 return True
         except Error as e:
             print(f"Error connecting for search: {e}")
@@ -25,12 +24,9 @@ class SearchManager:
         """Closes the database connection."""
         if self.connection and self.connection.is_connected():
             self.connection.close()
-            # print("SearchManager connection closed.")
 
     def search_files(self, query, search_by='filename'):
-        """
-        Searches the database for files based on the query.
-        """
+        """Searches the database for files based on the query."""
         if not self.connect():
             print("Cannot search: Database connection failed.")
             return []
@@ -38,9 +34,8 @@ class SearchManager:
         results = []
         cursor = None
         try:
-            cursor = self.connection.cursor(buffered=True) # Use buffered cursor for multiple rows
+            cursor = self.connection.cursor(buffered=True)
             
-            # Basic sanitization: Use parameterized queries to prevent SQL injection
             if search_by == 'filename':
                 sql = "SELECT filepath, filename FROM files WHERE filename LIKE %s"
             elif search_by == 'path':
@@ -77,12 +72,6 @@ class SearchManager:
             print(f"  **Location:** {format_navigable_path(filepath)}")
             print(f"  **Full Path:** {filepath}")
             
-            # Check if it's a directory or file (cannot check existence from DB alone reliably)
-            # You might add a 'is_directory' column to your DB for this.
-            # For now, we'll assume it's a file unless it's known to be a directory.
-            # For improved usability, a better check would be needed, e.g., os.path.isdir(filepath)
-            # but that would hit the filesystem, potentially slowing down display if many results.
-
             print(f"  To navigate, open File Explorer and copy the 'Full Path' and paste it into the address bar.")
             print(f"  Parent Folder: '{os.path.dirname(filepath)}'")
             print("=" * 60)
